@@ -1,23 +1,15 @@
-function combine(
-  input1: string | number,
-  input2: string | number,
-  resultOutput: "as-number" | "as-string"
-) {
-  let result;
-  if (
-    typeof input1 === "number" &&
-    typeof input2 === "number" &&
-    resultOutput === "as-number"
-  ) {
-    result = +input1 + +input2;
-  } else {
-    result = input1.toString() + input2.toString();
-  }
-  return result;
+function add(num1: number, num2: number): number {
+  return num1 + num2;
 }
 
-const combinedNames = combine("Clobbe", "doing TS", "as-string");
-const combinedAge = combine(29, 30, "as-number");
+function printResult(num: number): void {
+  console.log("result: " + num);
+}
 
-console.log(combinedNames);
-console.log(combinedAge);
+printResult(add(5, 12));
+
+let combineValues: (a: number, b: number) => number;
+// with this combineValues take a,b: number and expect a number as return type
+
+combineValues = add;
+console.log(combineValues(8, 8));
