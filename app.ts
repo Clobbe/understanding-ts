@@ -111,3 +111,15 @@ const movingAnimal = (animal: Animal) => {
 };
 
 movingAnimal({ type: 'horse', runningSpeed: 20 });
+
+/* Type Casting */
+
+//const userInputElement = <HTMLInputElement>document.getElementById('userInput')
+/* this makes TS understand what type it is on the element that's fetched from the html. */
+
+const userInputElement = document.getElementById(
+  'userInput'
+) as HTMLInputElement;
+//and this is simply just an alternative way of doing it
+
+userInputElement.value = "Here's a value for you!";
