@@ -27,13 +27,23 @@ type CombineNumeric = Combine & Numeric;
 
 /* "Type Guarding" */
 
-const add = (a: Combine, b: Combine) => {
+/* Function Overloading - adding func overload */
+/* useful in order to make TS understand what the return type for each case would be */
+function add(a: number, b: number): number;
+function add(a: string, b: string): string;
+function add(a: string, b: number): string;
+function add(a: number, b: string): string;
+function add(a: Combine, b: Combine) {
   if (typeof a === 'string' || typeof b === 'string') {
     // the above line is what's called a type guard
     return a.toString() + b.toString();
   }
   return a + b;
-};
+}
+
+const result1 = add('hi', 'there');
+const result2 = add('hi', 2);
+const result3 = add(3, 2);
 
 /* below illustrate similar, but instead of a type guarding, this is more of "property guarding". Meaning, checking if a certain property exists on the object or not.*/
 type UnknownEmployee = Employee | Admin;
@@ -128,11 +138,12 @@ userInputElement.value = "Here's a value for you!";
 /* this is useful when I want to type something but I don't know which keys or how many keys I'll collect in advance */
 
 interface ErrorContainer {
-  [props: string]: string;
+  [props: string]: string | number;
 }
 /* this type declaration ensures that an error that's used with this interface is a string */
 
 const errorBag: ErrorContainer = {
+  id: 1,
   email: 'Not a valid email address',
   username: 'Username must start with a capital letter',
 };
