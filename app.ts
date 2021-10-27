@@ -123,3 +123,16 @@ const userInputElement = document.getElementById(
 //and this is simply just an alternative way of doing it
 
 userInputElement.value = "Here's a value for you!";
+
+/* Index Properties */
+/* this is useful when I want to type something but I don't know which keys or how many keys I'll collect in advance */
+
+interface ErrorContainer {
+  [props: string]: string;
+}
+/* this type declaration ensures that an error that's used with this interface is a string */
+
+const errorBag: ErrorContainer = {
+  email: 'Not a valid email address',
+  username: 'Username must start with a capital letter',
+};
