@@ -147,3 +147,16 @@ const errorBag: ErrorContainer = {
   email: 'Not a valid email address',
   username: 'Username must start with a capital letter',
 };
+
+/* Optional Chaining */
+/* this is really helpful when for example an data object is fetched from a server and we want to do something if a property exists.*/
+
+const fetchedDataObject = {
+  id: 1,
+  name: 'clobbsson',
+  job: { title: 'cto', description: 'working with TypeScript' },
+};
+
+console.log(fetchedDataObject?.job?.description);
+console.log(fetchedDataObject?.job?.title);
+/* like in many other cases with TypeScript, the "?" works as an "optional"-operator */
