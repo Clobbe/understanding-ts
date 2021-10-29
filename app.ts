@@ -160,3 +160,11 @@ const fetchedDataObject = {
 console.log(fetchedDataObject?.job?.description);
 console.log(fetchedDataObject?.job?.title);
 /* like in many other cases with TypeScript, the "?" works as an "optional"-operator */
+
+/* Nullish Coalescing */
+/* useful when I don't know in advance whether a value is null or undefined */
+
+const unknownConstant = '';
+const NullishCoalescing = unknownConstant ?? 'DEFAULT VALUE';
+
+/* by using the ??-operator here this translates roughly into, "if the value of unknownConstant is undefined or null" then set 'DEFAULT VALUE' to NullishCoalescing */
