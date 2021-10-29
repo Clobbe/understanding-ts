@@ -56,3 +56,23 @@ const countAndDescribeAsArrowFunc = <T extends Lengthy>(
 };
 
 console.log(countAndDescribeAsArrowFunc('hello, world (again)!'));
+
+/* ====================================================================== */
+
+/* Working with "keyof" */
+/* 
+const extractAndConvert = (obj: object, key: string) => {
+  return obj[key];
+}; */
+/* this code block won't work since we don't know for sure that the passed in Object has a property (key) that's of type string  */
+
+const extractAndConvert = <T extends object, U extends keyof T>(
+  obj: T,
+  key: U
+) => {
+  return obj[key];
+};
+
+console.log(extractAndConvert({ name: 'clobbsson' }, 'name'));
+
+/* this concept I definitely see some future use cases for...*/
