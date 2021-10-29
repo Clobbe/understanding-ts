@@ -24,4 +24,35 @@ const mergedObj = merge({ name: 'clobbsson' }, { age: 30 });
 console.log(mergedObj);
 /* by using "extends" in the type definition this means that the type T/U will take whatever the type "object" also take. Similar to inheritance of the perks and features of the constraints that the regular "object"-type have */
 
+/* ====================================================================== */
 
+/* Playing around with Generic Type Definition */
+interface Lengthy {
+  length: number;
+}
+
+function countAndDescribe<T extends Lengthy>(element: T): [T, string] {
+  let description = 'No desc available';
+  if (element.length === 1) {
+    description = 'Got 1 element';
+  } else if (element.length > 1) {
+    description = `Got ${element.length} elements`;
+  }
+  return [element, description];
+}
+
+console.log(countAndDescribe('hello, world!'));
+
+const countAndDescribeAsArrowFunc = <T extends Lengthy>(
+  element: T
+): [T, string] => {
+  let description = 'No desc available';
+  if (element.length === 1) {
+    description = 'Got 1 element';
+  } else if (element.length > 1) {
+    description = `Got ${element.length} elements`;
+  }
+  return [element, description];
+};
+
+console.log(countAndDescribeAsArrowFunc('hello, world (again)!'));
