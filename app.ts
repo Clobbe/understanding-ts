@@ -1,13 +1,15 @@
 /* Decorators */
 /* a Decorator is simply a function that you apply to i.e. a class. */
 
-function Logger(constructor: Function) {
+function Logger(logString: string) {
+  return function (constructor: Function) {
+    console.log(logString);
+    console.log(constructor);
+  };
   //a common convention is to use Capital letter on the decorator.
-  console.log('Logging...');
-  console.log(constructor);
 }
 
-@Logger
+@Logger('LOG - class Person')
 class Person {
   name = 'clobbsson';
   constructor() {
