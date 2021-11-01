@@ -1,7 +1,23 @@
+enum ProjectStatus {Active, Finished}
+
+class Project {
+  constructor(public id:string,
+              public title:string,
+              public description:string,
+              public people:number,
+              public status:ProjectStatus) {
+
+  }
+}
+
+
+type Listener = (items: Project[]) => void;
+
+
 //Project State Manager
 class ProjectState {
-  private listeners: any[] = []
-  private projects:any[] = [];
+  private listeners: Listener[] = []
+  private projects:Project[] = [];
   private static instance : ProjectState;
   
   private constructor(){}
@@ -16,17 +32,18 @@ class ProjectState {
   }
   /* this static getInstance()-block ensure that theres a global accessable instance of the class ProjectState. */
 
-  addListener(listenerFn : Function){
+  addListener(listenerFn : Listener){
     this.listeners.push(listenerFn);  //this add a function to the list of listeners
   }
 
   addProject(title:string, description:string, numOfPeople:number){
-    const newProject = {
-      id:Math.random().toString(),
-      title:title,
-      description:description,
-      people:numOfPeople
-    }
+    const newProject = new Project(
+      Math.random().toString(),
+      title,
+      description,
+      numOfPeople,
+      ProjectStatus.Active,
+    )
     this.projects.push(newProject);
     for (const listenerFn of this.listeners){
       listenerFn(this.projects.slice());  // the call of .slice() is done in order to get a copy of the project.
@@ -102,7 +119,7 @@ class ProjectList {
   templateElement: HTMLTemplateElement;
   hostElement: HTMLDivElement;
   element: HTMLElement;
-  assignedProjects: any[];
+  assignedProjects: Project[];
 
   constructor(private type:'active' | 'finished'){
     this.templateElement = document.getElementById(
@@ -121,7 +138,7 @@ class ProjectList {
     this.element.id = `${this.type}-projects`;
     //the above line set the id of the HTMLElement to it's type, i.e. active-projects
 
-    projectState.addListener((projects:any[]) => {
+    projectState.addListener((projects:Project[]) => {
       this.assignedProjects = projects;
       this.renderProjects();
     });
