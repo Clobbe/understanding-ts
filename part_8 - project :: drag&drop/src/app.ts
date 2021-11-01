@@ -1,5 +1,6 @@
 //Project State Manager
 class ProjectState {
+  private listeners: any[] = []
   private projects:any[] = [];
   private static instance : ProjectState;
   
@@ -15,6 +16,10 @@ class ProjectState {
   }
   /* this static getInstance()-block ensure that theres a global accessable instance of the class ProjectState. */
 
+  addListener(listenerFn : Function){
+    this.listeners.push(listenerFn);  //this add a function to the list of listeners
+  }
+
   addProject(title:string, description:string, numOfPeople:number){
     const newProject = {
       id:Math.random().toString(),
@@ -23,6 +28,9 @@ class ProjectState {
       people:numOfPeople
     }
     this.projects.push(newProject);
+    for (const listenerFn of this.listeners){
+      listenerFn(this.projects.slice());  // the call of .slice() is done in order to get a copy of the project.
+    }
   }
 }
 
@@ -94,21 +102,50 @@ class ProjectList {
   templateElement: HTMLTemplateElement;
   hostElement: HTMLDivElement;
   element: HTMLElement;
+  assignedProjects: any[];
 
   constructor(private type:'active' | 'finished'){
     this.templateElement = document.getElementById(
       'project-list'
     )! as HTMLTemplateElement;
     this.hostElement = document.getElementById('app')! as HTMLDivElement;
+    this.assignedProjects = [];
 
     const importedContent = document.importNode(
       this.templateElement.content,
       true
-    ); //this will import the content of whatever the content is of the template.
+    ); 
+    //this will import the content of whatever the content is of the template.
+    
     this.element = importedContent.firstElementChild as HTMLElement;
     this.element.id = `${this.type}-projects`;
+    //the above line set the id of the HTMLElement to it's type, i.e. active-projects
+
+    projectState.addListener((projects:any[]) => {
+      this.assignedProjects = projects;
+      this.renderProjects();
+    });
+
     this.attach()
-    this.renderContent()
+    this.renderContent() 
+  }
+
+  private renderProjects(){
+    const listEl = document.getElementById(`${this.type}-project-list`)! as HTMLUListElement;
+    //the above line make sure to fetch the newly created <ul>-object. And using TypeCasting to tell TS that the fetched object is a HTMLUListElement.
+    
+    for(const prjItems of this.assignedProjects){
+      //here we're looping through the array of projects that exists in this.assignedProjects-array. 
+      
+      const listItem = document.createElement('li');
+      // then we create a list-element (<li>)
+
+      listItem.textContent = prjItems.title;
+      //which is here populated with the title of the current prjItem.
+
+      listEl.appendChild(listItem)
+      //last, the newly created <li> element is appended as a child of the <ul> element
+    }
   }
 
   private renderContent() {
@@ -206,7 +243,7 @@ class ProjectInput {
     const userInput = this.gatherUserInput();
     if (Array.isArray(userInput)) {
       const [title, desc, people] = userInput;
-      console.log(title, desc, people);
+      projectState.addProject(title, desc, people); // this line adds the input values received from the user in the form and then upon clicking submit, this will add the new project to the projects-array in the instance of ProjectState.
       this.clearInputs();
     }
   }
