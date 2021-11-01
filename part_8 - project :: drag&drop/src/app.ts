@@ -80,12 +80,16 @@ class ProjectList {
     this.renderContent()
   }
   private renderContent() {
-    const listId = `${this.type}-project-list`;
+    /* this method is used to render the content that was first attached with the attach() method */
+
+    const listId = `${this.type}-project-list`;   // this sets the id-property on the <ul>-tag
     this.element.querySelector('ul')!.id = listId;
-    this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS'
+    this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS' //this is reponsible for adding the text content, i.e. the <h2>-title
 
   }
   private attach() {
+    /* similar to the attach()-method implemented in class ProjectInput this method is responsible for "attaching" the hostElement to the "this"-keyword, but here before the end of the div-tag with id='app' */
+
     this.hostElement.insertAdjacentElement('beforeend', this.element); //when calling this method, this will insert the imported template-HTML and insert this after the "opening-tag" of our div "app"
   }
   }
