@@ -1,3 +1,34 @@
+//Project State Manager
+class ProjectState {
+  private projects:any[] = [];
+  private static instance : ProjectState;
+  
+  private constructor(){}
+  
+
+  static getInstance(){
+    if(this.instance){
+      return this.instance;
+    }
+    this.instance = new ProjectState();
+    return this.instance;
+  }
+  /* this static getInstance()-block ensure that theres a global accessable instance of the class ProjectState. */
+
+  addProject(title:string, description:string, numOfPeople:number){
+    const newProject = {
+      id:Math.random().toString(),
+      title:title,
+      description:description,
+      people:numOfPeople
+    }
+    this.projects.push(newProject);
+  }
+}
+
+const projectState = ProjectState.getInstance(); //by calling this method, we retrieve if there's an existing ProjectState or simply a newly created ProjectState-instance if there is none.
+
+
 //implementation of validate()
 interface Validatable {
   value: string | number;
@@ -79,9 +110,9 @@ class ProjectList {
     this.attach()
     this.renderContent()
   }
+
   private renderContent() {
     /* this method is used to render the content that was first attached with the attach() method */
-
     const listId = `${this.type}-project-list`;   // this sets the id-property on the <ul>-tag
     this.element.querySelector('ul')!.id = listId;
     this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS' //this is reponsible for adding the text content, i.e. the <h2>-title
