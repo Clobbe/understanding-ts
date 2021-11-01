@@ -1,3 +1,48 @@
+//implementation of validate()
+interface Validatable {
+  value: string | number;
+  required: boolean;
+  minLength?: number; // this checks the length of the value
+  maxLength?: number; // this checks the length of the value
+  min?: number; // this checks the actual value
+  max?: number; // this checks the actual value
+}
+
+function validate(validationInput: Validatable) {
+  let isValid = true;
+
+  if (validationInput.required) {
+    isValid = isValid && validationInput.value.toString().trim().length !== 0;
+  }
+  if (
+    validationInput.minLength != null &&
+    typeof validationInput.value === 'string'
+  ) {
+    isValid =
+      isValid && validationInput.value.length > validationInput.minLength;
+  }
+  if (
+    validationInput.maxLength != null &&
+    typeof validationInput.value === 'string'
+  ) {
+    isValid =
+      isValid && validationInput.value.length < validationInput.maxLength;
+  }
+  if (
+    validationInput.min != null &&
+    typeof validationInput.value === 'number'
+  ) {
+    isValid = isValid && validationInput.value >= validationInput.min;
+  }
+  if (
+    validationInput.max != null &&
+    typeof validationInput.value === 'number'
+  ) {
+    isValid = isValid && validationInput.value <= validationInput.max;
+  }
+  return isValid;
+}
+
 /* //implmentation of a Autobind-decorator
 function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value;
@@ -56,11 +101,26 @@ class ProjectInput {
     const enteredDescription = this.descriptionInputElement.value;
     const enteredPeople = this.peopleInputElement.value;
 
-    //TODO :: add conditionals to check that no element is empty
+    const titleValidatable: Validatable = {
+      value: enteredTitle,
+      required: true,
+    };
+    const descValidatable: Validatable = {
+      value: enteredDescription,
+      required: true,
+      minLength: 5,
+    };
+    const peopleValidatable: Validatable = {
+      value: enteredPeople,
+      required: true,
+      min: 1,
+      max: 5,
+    };
+
     if (
-      enteredTitle.trim().length === 0 ||
-      enteredDescription.trim().length === 0 ||
-      enteredPeople.trim().length === 0
+      !validate(titleValidatable) ||
+      !validate(descValidatable) ||
+      !validate(peopleValidatable)
     ) {
       alert('invalid input, make sure all fields are filled');
       return;
