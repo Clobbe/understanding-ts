@@ -1,3 +1,19 @@
+/* //implmentation of a Autobind-decorator
+function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
+  const originalMethod = descriptor.value;
+  const adjDescriptor: PropertyDescriptor = {
+    configurable: true,
+    get() {
+      const boundFn = originalMethod.bind(this);
+      return boundFn;
+    },
+  };
+  return adjDescriptor;
+}
+ */
+/* For some reason the Autobind-decorator doesn't work properly. It returns as "undefined" */
+
+//ProjectInput Class
 class ProjectInput {
   templateElement: HTMLTemplateElement;
   hostElement: HTMLDivElement;
@@ -41,7 +57,7 @@ class ProjectInput {
 
   private configure() {
     //since the function is only suppose to be called from within the constructor, this is defined as a 'private' function
-    this.element.addEventListener('submit', this.submitHandler);
+    this.element.addEventListener('submit', this.submitHandler.bind(this));
     //this function 'listen' for the form-submission and then call the submitHandler-function
   }
 
