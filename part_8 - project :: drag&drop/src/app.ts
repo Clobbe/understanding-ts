@@ -17,7 +17,7 @@ but then you would create a new object with the type Project instead. */
 
 
 type Listener = (items: Project[]) => void;
-
+// this is to type the listener-fn
 
 //Project State Manager
 class ProjectState {
@@ -144,7 +144,17 @@ class ProjectList {
     //the above line set the id of the HTMLElement to it's type, i.e. active-projects
 
     projectState.addListener((projects:Project[]) => {
-      this.assignedProjects = projects;
+      const filteredProjects = projects.filter(prj => {
+        // the .filter function is built in and expect to get a critera to filter either true/false.
+        if(this.type === 'active'){
+          return prj.status === ProjectStatus.Active
+          //so, if the type is 'active' then return the enum-status from ProjectStatus.Active
+        }
+        return prj.status === ProjectStatus.Finished
+        //else return the enum-status from ProjectStatus.Finished
+
+      });
+      this.assignedProjects = filteredProjects;
       this.renderProjects();
     });
 
@@ -156,6 +166,10 @@ class ProjectList {
     const listEl = document.getElementById(`${this.type}-project-list`)! as HTMLUListElement;
     //the above line make sure to fetch the newly created <ul>-object. And using TypeCasting to tell TS that the fetched object is a HTMLUListElement.
     
+    listEl.innerHTML = '';
+    // by adding this line, we ensure that what's about to get rendered is empty and will therefore remove the issue with duplication-rendering. This way works fine in this project, but for a larger project it would cause some performance issues, i.e. using more memory than necessary.
+
+
     for(const prjItems of this.assignedProjects){
       //here we're looping through the array of projects that exists in this.assignedProjects-array. 
       
