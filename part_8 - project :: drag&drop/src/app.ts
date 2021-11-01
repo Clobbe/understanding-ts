@@ -1,6 +1,11 @@
 enum ProjectStatus {Active, Finished}
+// by using enum here it's possible to get auto-correction. 
 
 class Project {
+/* the reason for implementing this as a class instead of let's say an interface
+or a type is because with this approach it's now possible to instantiate a new object
+that's typed correctly. Alternatively you could get the same result with an Interface, 
+but then you would create a new object with the type Project instead. */
   constructor(public id:string,
               public title:string,
               public description:string,
