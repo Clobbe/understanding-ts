@@ -58,7 +58,39 @@ function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
  */
 /* For some reason the Autobind-decorator doesn't work properly. It returns as "undefined" */
 
-//ProjectInput Class
+
+class ProjectList {
+  templateElement: HTMLTemplateElement;
+  hostElement: HTMLDivElement;
+  element: HTMLElement;
+
+  constructor(private type:'active' | 'finished'){
+    this.templateElement = document.getElementById(
+      'project-list'
+    )! as HTMLTemplateElement;
+    this.hostElement = document.getElementById('app')! as HTMLDivElement;
+
+    const importedContent = document.importNode(
+      this.templateElement.content,
+      true
+    ); //this will import the content of whatever the content is of the template.
+    this.element = importedContent.firstElementChild as HTMLElement;
+    this.element.id = `${this.type}-projects`;
+    this.attach()
+    this.renderContent()
+  }
+  private renderContent() {
+    const listId = `${this.type}-project-list`;
+    this.element.querySelector('ul')!.id = listId;
+    this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS'
+
+  }
+  private attach() {
+    this.hostElement.insertAdjacentElement('beforeend', this.element); //when calling this method, this will insert the imported template-HTML and insert this after the "opening-tag" of our div "app"
+  }
+  }
+}
+
 class ProjectInput {
   templateElement: HTMLTemplateElement;
   hostElement: HTMLDivElement;
@@ -156,3 +188,5 @@ class ProjectInput {
 }
 
 const prjIn = new ProjectInput();
+const activePrjList = new ProjectList('active');
+const finishedPrjList = new ProjectList('finished');
