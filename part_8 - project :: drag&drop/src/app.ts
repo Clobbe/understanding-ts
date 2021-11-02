@@ -1,8 +1,25 @@
+//Drag & Drop interfaces
+interface Draggable {
+  dragStartHandler(event: DragEvent): void;
+  dragEndHandler(event: DragEvent): void;
+}
+
+interface DragTarget {
+  dragOverHandler(event: DragEvent): void;
+  // needed in order to signal to the browser that something is dragging. Without it it would be impossible to "drop" the object that's being dragged.
+
+  dropHandler(event: DragEvent): void;
+  // this is need to react to the drop
+
+  dragLeaveHandler(event: DragEvent): void; //using 'void' here means that the method will return nothing.
+  // useful to enable visual feedback for the user when an object is dragged. this method could also be used to handle for instance "resetting" an invalid dragging.
+}
+
 enum ProjectStatus {
   Active,
   Finished,
 }
-// by using enum here it's possible to get auto-correction.
+// by using enum here it's possible to get auto-correction + it's a very useful way of doing this.
 
 class Project {
   /* the reason for implementing this as a class instead of let's say an interface
@@ -109,7 +126,7 @@ function validate(validationInput: Validatable) {
 }
 
 // autobind decorator
-/* function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
+function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value;
   const adjDescriptor: PropertyDescriptor = {
     configurable: true,
@@ -119,9 +136,9 @@ function validate(validationInput: Validatable) {
     },
   };
   return adjDescriptor;
-} */
-/* For some reason the Autobind-decorator doesn't work properly. It returns as "undefined" */
+}
 
+/* For some reason the Autobind-decorator doesn't work properly. It returns as "undefined" */
 abstract class BaseClass<T extends HTMLElement, U extends HTMLElement> {
   // here the generic types T and U are used.
   templateElement: HTMLTemplateElement;
@@ -165,7 +182,10 @@ abstract class BaseClass<T extends HTMLElement, U extends HTMLElement> {
   abstract renderContent(): void;
 }
 
-class ProjectItem extends BaseClass<HTMLUListElement, HTMLLIElement> {
+class ProjectItem
+  extends BaseClass<HTMLUListElement, HTMLLIElement>
+  implements Draggable
+{
   private project: Project;
 
   get persons() {
@@ -185,7 +205,21 @@ class ProjectItem extends BaseClass<HTMLUListElement, HTMLLIElement> {
     this.renderContent();
   }
 
-  configure() {}
+  dragStartHandler(event: DragEvent) {
+    console.log(event);
+  }
+
+  dragEndHandler(_: DragEvent) {
+    console.log('dragEndHandler');
+  }
+
+  configure() {
+    this.element.addEventListener(
+      'dragstart',
+      this.dragStartHandler.bind(this)
+    );
+    this.element.addEventListener('dragend', this.dragEndHandler.bind(this));
+  }
   renderContent() {
     this.element.querySelector('h2')!.textContent = this.project.title;
     this.element.querySelector('h3')!.textContent = this.persons + ' assigned';
@@ -193,7 +227,10 @@ class ProjectItem extends BaseClass<HTMLUListElement, HTMLLIElement> {
   }
 }
 
-class ProjectList extends BaseClass<HTMLDivElement, HTMLElement> {
+class ProjectList
+  extends BaseClass<HTMLDivElement, HTMLElement>
+  implements DragTarget
+{
   assignedProjects: Project[];
   constructor(private type: 'active' | 'finished') {
     super('project-list', 'app', true, `${type}-projects`);
@@ -203,7 +240,26 @@ class ProjectList extends BaseClass<HTMLDivElement, HTMLElement> {
     this.renderContent();
   }
 
+  @autobind
+  dragOverHandler(_: DragEvent) {
+    const listEl = this.element.querySelector('ul')!;
+    listEl.classList.add('droppable'); //this ensures that the CSS-class 'droppable' when we're starting to drag a list element.
+  }
+  dropHandler(_: DragEvent) {}
+
+  @autobind
+  dragLeaveHandler(_: DragEvent) {
+    const listEl = this.element.querySelector('ul')!;
+    listEl.classList.remove('droppable'); //this line make sure that when we let go of the list element we remove the CSS-class 'droppable'. Do the opposite from "dragOverHnadler()"-method
+  }
+
   configure() {
+    this.element.addEventListener('dragover', this.dragOverHandler); //this will ensure that then the list element is dragged, this line will make sure to fire the dragOverHandler
+
+    this.element.addEventListener('dragleave', this.dragLeaveHandler); //this will ensure that when the list element is released, then fire off the 'dragLeaveHandler()'-method
+
+    this.element.addEventListener('drop', this.dropHandler); //this will ensure that when the list element is dropped, then fire off the 'dropHandler()'-method<
+
     projectState.addListener((projects: Project[]) => {
       const filteredProjects = projects.filter((prj) => {
         // the .filter function is built in and expect to get a critera to filter either true/false.
