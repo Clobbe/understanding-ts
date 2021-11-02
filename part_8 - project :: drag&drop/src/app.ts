@@ -76,6 +76,19 @@ class ProjectState extends State<Project> {
       listenerFn(this.projects.slice()); // the call of .slice() is done in order to get a copy of the project.
     }
   }
+
+  moveProject(projectId: string, newStatus: ProjectStatus) {
+    const project = this.projects.find((prj) => prj.id === projectId);
+    if (project && project.status !== newStatus) {
+      project.status = newStatus;
+    }
+  }
+
+  private updateListners() {
+    for (const listenerFn of this.listeners) {
+      listenerFn(this.projects.slice());
+    }
+  }
 }
 
 const projectState = ProjectState.getInstance(); //by calling this method, we retrieve if there's an existing ProjectState or simply a newly created ProjectState-instance if there is none.
@@ -205,20 +218,21 @@ class ProjectItem
     this.renderContent();
   }
 
+  @autobind
   dragStartHandler(event: DragEvent) {
-    console.log(event);
+    event.dataTransfer!.setData('text/plain', this.project.id);
+    //this enables the transfer of data from the project.id to the event object.
+    event.dataTransfer!.effectAllowed = 'move'; //this tells the browser, which cursor to display to the user.
   }
 
-  dragEndHandler(_: DragEvent) {
-    console.log('dragEndHandler');
+  dragEndHandler(event: DragEvent) {
+    console.log(event.dataTransfer!.getData('text/plain'));
   }
 
+  @autobind
   configure() {
-    this.element.addEventListener(
-      'dragstart',
-      this.dragStartHandler.bind(this)
-    );
-    this.element.addEventListener('dragend', this.dragEndHandler.bind(this));
+    this.element.addEventListener('dragstart', this.dragStartHandler);
+    this.element.addEventListener('dragend', this.dragEndHandler);
   }
   renderContent() {
     this.element.querySelector('h2')!.textContent = this.project.title;
@@ -241,11 +255,22 @@ class ProjectList
   }
 
   @autobind
-  dragOverHandler(_: DragEvent) {
-    const listEl = this.element.querySelector('ul')!;
-    listEl.classList.add('droppable'); //this ensures that the CSS-class 'droppable' when we're starting to drag a list element.
+  dragOverHandler(event: DragEvent) {
+    if (event.dataTransfer && event.dataTransfer.types[0] === 'text/plain') {
+      //this if-check make sure that a dataTransfer must have occurred before the actual dragging of the element is moved.
+      event.preventDefault(); // this make sure that a drag & drop-event is allowed.
+      const listEl = this.element.querySelector('ul')!;
+      listEl.classList.add('droppable'); //this ensures that the CSS-class 'droppable' when we're starting to drag a list element.
+    }
   }
-  dropHandler(_: DragEvent) {}
+  @autobind
+  dropHandler(event: DragEvent) {
+    const projectId = event.dataTransfer!.getData('text/plain');
+    projectState.moveProject(
+      projectId,
+      this.type === 'active' ? ProjectStatus.Active : ProjectStatus.Finished
+    );
+  }
 
   @autobind
   dragLeaveHandler(_: DragEvent) {
