@@ -108,8 +108,8 @@ function validate(validationInput: Validatable) {
   return isValid;
 }
 
-/* //implmentation of a Autobind-decorator
-function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
+// autobind decorator
+/* function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value;
   const adjDescriptor: PropertyDescriptor = {
     configurable: true,
@@ -245,7 +245,7 @@ class ProjectInput extends BaseClass<HTMLDivElement, HTMLFormElement> {
   }
 
   configure() {
-    this.element.addEventListener('submit', this.submitHandler);
+    this.element.addEventListener('submit', this.submitHandler.bind(this));
   }
 
   renderContent() {}
