@@ -1,35 +1,44 @@
-enum ProjectStatus {Active, Finished}
-// by using enum here it's possible to get auto-correction. 
+enum ProjectStatus {
+  Active,
+  Finished,
+}
+// by using enum here it's possible to get auto-correction.
 
 class Project {
-/* the reason for implementing this as a class instead of let's say an interface
+  /* the reason for implementing this as a class instead of let's say an interface
 or a type is because with this approach it's now possible to instantiate a new object
 that's typed correctly. Alternatively you could get the same result with an Interface, 
 but then you would create a new object with the type Project instead. */
-  constructor(public id:string,
-              public title:string,
-              public description:string,
-              public people:number,
-              public status:ProjectStatus) {
-
-  }
+  constructor(
+    public id: string,
+    public title: string,
+    public description: string,
+    public people: number,
+    public status: ProjectStatus
+  ) {}
 }
 
-
-type Listener = (items: Project[]) => void;
+type Listener<T> = (items: T[]) => void;
 // this is to type the listener-fn
 
-//Project State Manager
-class ProjectState {
-  private listeners: Listener[] = []
-  private projects:Project[] = [];
-  private static instance : ProjectState;
-  
-  private constructor(){}
-  
+class State<T> {
+  protected listeners: Listener<T>[] = [];
 
-  static getInstance(){
-    if(this.instance){
+  addListener(listenerFn: Listener<T>) {
+    this.listeners.push(listenerFn); //this add a function to the list of listeners
+  }
+}
+//Project State Manager
+class ProjectState extends State<Project> {
+  private projects: Project[] = [];
+  private static instance: ProjectState;
+
+  private constructor() {
+    super();
+  }
+
+  static getInstance() {
+    if (this.instance) {
       return this.instance;
     }
     this.instance = new ProjectState();
@@ -37,27 +46,22 @@ class ProjectState {
   }
   /* this static getInstance()-block ensure that theres a global accessable instance of the class ProjectState. */
 
-  addListener(listenerFn : Listener){
-    this.listeners.push(listenerFn);  //this add a function to the list of listeners
-  }
-
-  addProject(title:string, description:string, numOfPeople:number){
+  addProject(title: string, description: string, numOfPeople: number) {
     const newProject = new Project(
       Math.random().toString(),
       title,
       description,
       numOfPeople,
-      ProjectStatus.Active,
-    )
+      ProjectStatus.Active
+    );
     this.projects.push(newProject);
-    for (const listenerFn of this.listeners){
-      listenerFn(this.projects.slice());  // the call of .slice() is done in order to get a copy of the project.
+    for (const listenerFn of this.listeners) {
+      listenerFn(this.projects.slice()); // the call of .slice() is done in order to get a copy of the project.
     }
   }
 }
 
 const projectState = ProjectState.getInstance(); //by calling this method, we retrieve if there's an existing ProjectState or simply a newly created ProjectState-instance if there is none.
-
 
 //implementation of validate()
 interface Validatable {
@@ -105,7 +109,7 @@ function validate(validationInput: Validatable) {
 }
 
 /* //implmentation of a Autobind-decorator
-function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
+function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value;
   const adjDescriptor: PropertyDescriptor = {
     configurable: true,
@@ -115,112 +119,118 @@ function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
     },
   };
   return adjDescriptor;
-}
- */
+} */
 /* For some reason the Autobind-decorator doesn't work properly. It returns as "undefined" */
 
-
-class ProjectList {
+abstract class BaseClass<T extends HTMLElement, U extends HTMLElement> {
+  // here the generic types T and U are used.
   templateElement: HTMLTemplateElement;
-  hostElement: HTMLDivElement;
-  element: HTMLElement;
-  assignedProjects: Project[];
+  hostElement: T;
+  element: U;
 
-  constructor(private type:'active' | 'finished'){
+  constructor(
+    templateId: string,
+    hostElementId: string,
+    insertAtBeginning: boolean,
+    newElementId?: string
+  ) {
     this.templateElement = document.getElementById(
-      'project-list'
+      templateId
     )! as HTMLTemplateElement;
-    this.hostElement = document.getElementById('app')! as HTMLDivElement;
-    this.assignedProjects = [];
+    this.hostElement = document.getElementById(hostElementId)! as T;
 
     const importedContent = document.importNode(
       this.templateElement.content,
       true
-    ); 
+    );
     //this will import the content of whatever the content is of the template.
-    
-    this.element = importedContent.firstElementChild as HTMLElement;
-    this.element.id = `${this.type}-projects`;
-    //the above line set the id of the HTMLElement to it's type, i.e. active-projects
 
-    projectState.addListener((projects:Project[]) => {
-      const filteredProjects = projects.filter(prj => {
+    this.element = importedContent.firstElementChild as U;
+    if (newElementId) {
+      this.element.id = newElementId;
+      //the above line set the id of the HTMLElement to it's type, i.e. active-projects
+    }
+    this.attach(insertAtBeginning);
+  }
+  private attach(insertAtBeginning: boolean) {
+    /* similar to the attach()-method implemented in class ProjectInput this method is responsible for "attaching" the hostElement to the "this"-keyword, but here before the end of the div-tag with id='app' */
+
+    this.hostElement.insertAdjacentElement(
+      insertAtBeginning ? 'afterbegin' : 'beforebegin', //inline IF/ELSE statement, to determine location where element should be inserted...
+      this.element
+    ); //when calling this method, this will insert the imported template-HTML and insert this after the "opening-tag" of our div "app"
+  }
+
+  abstract configure(): void;
+  abstract renderContent(): void;
+}
+
+class ProjectList extends BaseClass<HTMLDivElement, HTMLElement> {
+  assignedProjects: Project[];
+  constructor(private type: 'active' | 'finished') {
+    super('project-list', 'app', false, `${type}-projects`);
+    this.assignedProjects = [];
+
+    this.configure();
+    this.renderContent();
+  }
+
+  configure() {
+    projectState.addListener((projects: Project[]) => {
+      const filteredProjects = projects.filter((prj) => {
         // the .filter function is built in and expect to get a critera to filter either true/false.
-        if(this.type === 'active'){
-          return prj.status === ProjectStatus.Active
+        if (this.type === 'active') {
+          return prj.status === ProjectStatus.Active;
           //so, if the type is 'active' then return the enum-status from ProjectStatus.Active
         }
-        return prj.status === ProjectStatus.Finished
+        return prj.status === ProjectStatus.Finished;
         //else return the enum-status from ProjectStatus.Finished
-
       });
       this.assignedProjects = filteredProjects;
       this.renderProjects();
     });
-
-    this.attach()
-    this.renderContent() 
   }
 
-  private renderProjects(){
-    const listEl = document.getElementById(`${this.type}-project-list`)! as HTMLUListElement;
+  renderContent() {
+    /* this method is used to render the content that was first attached with the attach() method */
+    const listId = `${this.type}-project-list`; // this sets the id-property on the <ul>-tag
+    this.element.querySelector('ul')!.id = listId;
+    this.element.querySelector('h2')!.textContent =
+      this.type.toUpperCase() + ' PROJECTS'; //this is reponsible for adding the text content, i.e. the <h2>-title
+  }
+
+  private renderProjects() {
+    const listEl = document.getElementById(
+      `${this.type}-project-list`
+    )! as HTMLUListElement;
     //the above line make sure to fetch the newly created <ul>-object. And using TypeCasting to tell TS that the fetched object is a HTMLUListElement.
-    
+
     listEl.innerHTML = '';
     // by adding this line, we ensure that what's about to get rendered is empty and will therefore remove the issue with duplication-rendering. This way works fine in this project, but for a larger project it would cause some performance issues, i.e. using more memory than necessary.
 
+    for (const prjItems of this.assignedProjects) {
+      //here we're looping through the array of projects that exists in this.assignedProjects-array.
 
-    for(const prjItems of this.assignedProjects){
-      //here we're looping through the array of projects that exists in this.assignedProjects-array. 
-      
       const listItem = document.createElement('li');
       // then we create a list-element (<li>)
 
       listItem.textContent = prjItems.title;
       //which is here populated with the title of the current prjItem.
 
-      listEl.appendChild(listItem)
+      listEl.appendChild(listItem);
       //last, the newly created <li> element is appended as a child of the <ul> element
     }
   }
-
-  private renderContent() {
-    /* this method is used to render the content that was first attached with the attach() method */
-    const listId = `${this.type}-project-list`;   // this sets the id-property on the <ul>-tag
-    this.element.querySelector('ul')!.id = listId;
-    this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS' //this is reponsible for adding the text content, i.e. the <h2>-title
-
-  }
-  private attach() {
-    /* similar to the attach()-method implemented in class ProjectInput this method is responsible for "attaching" the hostElement to the "this"-keyword, but here before the end of the div-tag with id='app' */
-
-    this.hostElement.insertAdjacentElement('beforeend', this.element); //when calling this method, this will insert the imported template-HTML and insert this after the "opening-tag" of our div "app"
-  }
-  }
 }
 
-class ProjectInput {
-  templateElement: HTMLTemplateElement;
-  hostElement: HTMLDivElement;
-  element: HTMLFormElement;
-
-  //these fields are the elements inside the form. Elements which we'll want to access.
+class ProjectInput extends BaseClass<HTMLDivElement, HTMLFormElement> {
   titleInputElement: HTMLInputElement;
   descriptionInputElement: HTMLInputElement;
   peopleInputElement: HTMLInputElement;
+  //these fields are the elements inside the form. Elements which we'll want to access.
 
   constructor() {
-    this.templateElement = document.getElementById(
-      'project-input'
-    )! as HTMLTemplateElement;
-    this.hostElement = document.getElementById('app')! as HTMLDivElement;
-
-    const importedContent = document.importNode(
-      this.templateElement.content,
-      true
-    ); //this will import the content of whatever the content is of the template.
-    this.element = importedContent.firstElementChild as HTMLFormElement;
-    this.element.id = 'user-input';
+    super('project-input', 'app', false, 'user-input');
 
     this.titleInputElement = this.element.querySelector(
       '#title'
@@ -232,8 +242,13 @@ class ProjectInput {
       '#people'
     )! as HTMLInputElement;
     this.configure();
-    this.attach();
   }
+
+  configure() {
+    this.element.addEventListener('submit', this.submitHandler);
+  }
+
+  renderContent() {}
 
   private gatherUserInput(): [string, string, number] | void {
     //by adding 'void' to the method we tell TS that the method can return nothing/undefined
@@ -282,16 +297,6 @@ class ProjectInput {
       projectState.addProject(title, desc, people); // this line adds the input values received from the user in the form and then upon clicking submit, this will add the new project to the projects-array in the instance of ProjectState.
       this.clearInputs();
     }
-  }
-
-  private configure() {
-    //since the function is only suppose to be called from within the constructor, this is defined as a 'private' function
-    this.element.addEventListener('submit', this.submitHandler.bind(this));
-    //this function 'listen' for the form-submission and then call the submitHandler-function
-  }
-
-  private attach() {
-    this.hostElement.insertAdjacentElement('afterbegin', this.element); //when calling this method, this will insert the imported template-HTML and insert this after the "opening-tag" of our div "app"
   }
 }
 
