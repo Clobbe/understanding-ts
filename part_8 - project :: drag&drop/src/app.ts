@@ -156,7 +156,7 @@ abstract class BaseClass<T extends HTMLElement, U extends HTMLElement> {
     /* similar to the attach()-method implemented in class ProjectInput this method is responsible for "attaching" the hostElement to the "this"-keyword, but here before the end of the div-tag with id='app' */
 
     this.hostElement.insertAdjacentElement(
-      insertAtBeginning ? 'afterbegin' : 'beforebegin', //inline IF/ELSE statement, to determine location where element should be inserted...
+      insertAtBeginning ? 'beforebegin' : 'afterbegin', //inline IF/ELSE statement, to determine location where element should be inserted...
       this.element
     ); //when calling this method, this will insert the imported template-HTML and insert this after the "opening-tag" of our div "app"
   }
@@ -165,10 +165,38 @@ abstract class BaseClass<T extends HTMLElement, U extends HTMLElement> {
   abstract renderContent(): void;
 }
 
+class ProjectItem extends BaseClass<HTMLUListElement, HTMLLIElement> {
+  private project: Project;
+
+  get persons() {
+    /* this getter enables a method in the this.keyword and make sure to return the correct wording. */
+    if (this.project.people === 1) {
+      return '1 person';
+    } else {
+      return `${this.project.people} persons`;
+    }
+  }
+
+  constructor(hostId: string, project: Project) {
+    super('single-project', hostId, false, project.id);
+    this.project = project;
+
+    this.configure();
+    this.renderContent();
+  }
+
+  configure() {}
+  renderContent() {
+    this.element.querySelector('h2')!.textContent = this.project.title;
+    this.element.querySelector('h3')!.textContent = this.persons + ' assigned';
+    this.element.querySelector('p')!.textContent = this.project.description;
+  }
+}
+
 class ProjectList extends BaseClass<HTMLDivElement, HTMLElement> {
   assignedProjects: Project[];
   constructor(private type: 'active' | 'finished') {
-    super('project-list', 'app', false, `${type}-projects`);
+    super('project-list', 'app', true, `${type}-projects`);
     this.assignedProjects = [];
 
     this.configure();
@@ -210,15 +238,7 @@ class ProjectList extends BaseClass<HTMLDivElement, HTMLElement> {
 
     for (const prjItems of this.assignedProjects) {
       //here we're looping through the array of projects that exists in this.assignedProjects-array.
-
-      const listItem = document.createElement('li');
-      // then we create a list-element (<li>)
-
-      listItem.textContent = prjItems.title;
-      //which is here populated with the title of the current prjItem.
-
-      listEl.appendChild(listItem);
-      //last, the newly created <li> element is appended as a child of the <ul> element
+      new ProjectItem(this.element.querySelector('ul')!.id, prjItems);
     }
   }
 }
@@ -230,7 +250,7 @@ class ProjectInput extends BaseClass<HTMLDivElement, HTMLFormElement> {
   //these fields are the elements inside the form. Elements which we'll want to access.
 
   constructor() {
-    super('project-input', 'app', false, 'user-input');
+    super('project-input', 'app', true, 'user-input');
 
     this.titleInputElement = this.element.querySelector(
       '#title'
