@@ -1,19 +1,4 @@
-//Drag & Drop interfaces
-interface Draggable {
-  dragStartHandler(event: DragEvent): void;
-  dragEndHandler(event: DragEvent): void;
-}
 
-interface DragTarget {
-  dragOverHandler(event: DragEvent): void;
-  // needed in order to signal to the browser that something is dragging. Without it it would be impossible to "drop" the object that's being dragged.
-
-  dropHandler(event: DragEvent): void;
-  // this is need to react to the drop
-
-  dragLeaveHandler(event: DragEvent): void; //using 'void' here means that the method will return nothing.
-  // useful to enable visual feedback for the user when an object is dragged. this method could also be used to handle for instance "resetting" an invalid dragging.
-}
 
 enum ProjectStatus {
   Active,
