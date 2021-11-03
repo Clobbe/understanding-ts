@@ -1,13 +1,15 @@
-import { DragTarget } from '../models/drag-drop.js';
-import { Project, ProjectStatus } from '../models/project.js';
-import Component from './base-component.js';
-import { autobind } from '../decorators/autobind.js';
-import { projectState } from '../state/project-state.js';
-import { ProjectItem } from './project-item.js';
+import { DragTarget } from '../models/drag-drop';
+import { Project, ProjectStatus } from '../models/project';
+import Component from './base-component';
+import { autobind } from '../decorators/autobind';
+import { projectState } from '../state/project-state';
+import { ProjectItem } from './project-item';
 
 // ProjectList Class
-export class ProjectList extends Component<HTMLDivElement, HTMLElement>
-  implements DragTarget {
+export class ProjectList
+  extends Component<HTMLDivElement, HTMLElement>
+  implements DragTarget
+{
   assignedProjects: Project[];
 
   constructor(private type: 'active' | 'finished') {
@@ -48,7 +50,7 @@ export class ProjectList extends Component<HTMLDivElement, HTMLElement>
     this.element.addEventListener('drop', this.dropHandler);
 
     projectState.addListener((projects: Project[]) => {
-      const relevantProjects = projects.filter(prj => {
+      const relevantProjects = projects.filter((prj) => {
         if (this.type === 'active') {
           return prj.status === ProjectStatus.Active;
         }
