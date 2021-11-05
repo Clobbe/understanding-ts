@@ -13,11 +13,21 @@ const App: FC = () => {
       { id: Math.random().toString(), text: text },
     ]);
   };
+
+  const toDoDeleteHandler = (toDoId: string) => {
+    setToDo((prevToDos) => {
+      return prevToDos.filter((todo) => todo.id !== toDoId);
+    });
+    /* this handler takes, like on adding items, the current state of todo-items and by using the built-in filter-method we then filter all items except the current todo-item's id. */
+  };
+
   return (
     <div className="App">
       <NewToDo onAddToDo={toDoAddHandle} />
       {/* this 'pointer' is what enables the passing of data between the components.*/}
-      <ToDoList items={todos} />
+
+      <ToDoList items={todos} onDeleteToDo={toDoDeleteHandler} />
+      {/* by adding the prop onDeleteToDo and assigning the handler this is sent to ToDoList-component, which then removes the given todo-item */}
     </div>
   );
 };
