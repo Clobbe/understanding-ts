@@ -2,6 +2,7 @@ import axios from 'axios';
 
 type TGoogleGeocode = {
   results: { geometry: { location: { lat: number; lng: number } } }[];
+  status: 'OK' | 'ZERO_RESULTS' | 'INVALID_REQUEST';
 };
 /* this definition of our custom type ensure that we're telling TS what to expect in the response of the request to Gmaps-API */
 
@@ -23,9 +24,13 @@ const searchAddressHandler = (event: Event) => {
       )}&key=${gMapsApiKey}`
     )
     .then((response) => {
+      if (response.data.status !== 'OK') {
+        throw new Error("Couldn't fetch entered location");
+      }
       const coordinates = response.data.results[0].geometry.location;
     })
     .catch((err) => {
+      console.log(err.message);
       console.log(err);
     });
 };
