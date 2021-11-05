@@ -1,8 +1,5 @@
 import React from 'react';
-
-interface IToDo {
-  items: { id: string; text: string }[];
-}
+import { IToDo } from '../types/model';
 
 const ToDoList: React.FC<IToDo> = (props) => {
   return (

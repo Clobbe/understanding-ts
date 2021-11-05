@@ -1,17 +1,18 @@
-import React from 'react';
+import { FC, useState } from 'react';
 import ToDoList from './components/ToDoList';
 import NewToDo from './components/NewToDo';
+import { IToDo } from './types/model';
 
-const App: React.FC = () => {
-  const todos = [{ id: 'id1', text: 'complete this course' }];
-
+const App: FC = () => {
+  const [todos, setToDo] = useState<IToDo[]>([]);
   const toDoAddHandle = (text: string) => {
-    console.log(text);
+    setToDo([...todos, { id: Math.random().toString(), text: text }]);
   };
 
   return (
     <div className="App">
       <NewToDo onAddToDo={toDoAddHandle} />
+      {/* this 'pointer' is what enables the passing of data between the components.*/}
       <ToDoList items={todos} />
     </div>
   );
