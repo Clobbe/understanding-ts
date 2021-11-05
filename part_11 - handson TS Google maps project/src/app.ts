@@ -9,7 +9,7 @@ type TGoogleGeocode = {
 const form = document.querySelector('form')!;
 const addressInput = document.getElementById('address')! as HTMLInputElement; // exclamation mark (!) tells TS that this won't be null.
 
-const gMapsApiKey = 'AIzaSyDEaoBTSphBIfvGf1jvr2s4asU8X85KmyI';
+const gMapsApiKey = 'INSERT KEY HERE';
 
 declare var google: any;
 // by adding this line, we tell TS: "hey, no worries. There will be a variable called 'google'"
