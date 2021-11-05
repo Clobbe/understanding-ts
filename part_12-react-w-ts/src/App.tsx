@@ -4,9 +4,14 @@ import NewToDo from './components/NewToDo';
 
 const App: React.FC = () => {
   const todos = [{ id: 'id1', text: 'complete this course' }];
+
+  const toDoAddHandle = (text: string) => {
+    console.log(text);
+  };
+
   return (
     <div className="App">
-      <NewToDo />
+      <NewToDo onAddToDo={toDoAddHandle} />
       <ToDoList items={todos} />
     </div>
   );
