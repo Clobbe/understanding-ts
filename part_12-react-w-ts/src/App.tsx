@@ -6,9 +6,13 @@ import { IToDo } from './types/model';
 const App: FC = () => {
   const [todos, setToDo] = useState<IToDo[]>([]);
   const toDoAddHandle = (text: string) => {
-    setToDo([...todos, { id: Math.random().toString(), text: text }]);
+    /* setToDo([...todos, { id: Math.random().toString(), text: text }]); */
+    /* the above is a valid implementation, however it's not the most clean solution */
+    setToDo((prevToDos) => [
+      ...prevToDos,
+      { id: Math.random().toString(), text: text },
+    ]);
   };
-
   return (
     <div className="App">
       <NewToDo onAddToDo={toDoAddHandle} />
