@@ -1,46 +1,45 @@
-# Getting Started with Create React App
+# Part 12 - React with TypeScript
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Main learnings
 
-## Available Scripts
+### useState() with types
 
-In the project directory, you can run:
+```typescript
+const [todos, setToDo] = useState<IToDo[]>([]);
+```
 
-### `yarn start`
+The above is a simple example of how leveraging types support later on in the code. Making sure that, in this case setTodo() function receives the correct arguments to ensure that for this case, a new ToDo is added to the array, 'todos'.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### State Updates, clean and secure
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```typescript
+const toDoAddHandle = (text: string) => {
+  setToDo([...todos, { id: Math.random().toString(), text: text }]);
+};
+```
 
-### `yarn test`
+The above code example is a valid implementation of how to make sure we're 'unpacking' whatever exists in the array _todos_ and then adding a new Object to that array. For most cases there would probably not be any errors with this approach. However, due to how the state scheduler works in React, this implementation expose the risk of that it's _not_ the most current state that's being unpacked with the spread-operator (`...todos`) this way.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+A more cleaner and secure way of doing it is:
 
-### `yarn build`
+```typescript
+const toDoAddHandle = (text: string) => {
+    setToDo((prevToDos) => [
+      ...prevToDos,
+      { id: Math.random().toString(), text: text },
+    ]);
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+This way of implementation guarantees that we're updating the state with the most current state of whatever exists in the array `todos` (which is inferred into the `prevToDos`-function)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Below is an other example of how this safe implementation works:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```typescript
+const toDoDeleteHandler = (toDoId: string) => {
+  setToDo((prevToDos) => {
+    return prevToDos.filter((todo) => todo.id !== toDoId);
+  });
+};
+```
 
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Again, show that by unpacking whatever the array contain with the triggering of function (`prevToDos`) we ensure that we update the state properly. The filtering part in the code take care of filtering out the ToDo that should be deleted.
