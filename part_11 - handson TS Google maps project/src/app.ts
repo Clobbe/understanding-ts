@@ -11,6 +11,9 @@ const addressInput = document.getElementById('address')! as HTMLInputElement; //
 
 const gMapsApiKey = 'AIzaSyDEaoBTSphBIfvGf1jvr2s4asU8X85KmyI';
 
+declare var google: any;
+// by adding this line, we tell TS: "hey, no worries. There will be a variable called 'google'"
+
 const searchAddressHandler = (event: Event) => {
   event.preventDefault(); //this prevents that a HTTP-request is sent and so that the page it self don't reload.
   const enteredAddress = addressInput.value;
@@ -28,6 +31,17 @@ const searchAddressHandler = (event: Event) => {
         throw new Error("Couldn't fetch entered location");
       }
       const coordinates = response.data.results[0].geometry.location;
+      const map = new google.maps.Map(document.getElementById('map'), {
+        // this instantiate a map and render it to the Div-element that exists in the index.html-file.
+        center: { lat: coordinates.lat, lng: coordinates.lng },
+        zoom: 12,
+      });
+
+      new google.maps.Marker({
+        // as the code gives away, this adds a marker to the map, with the location of the coordinates.
+        position: coordinates,
+        map: map,
+      });
     })
     .catch((err) => {
       console.log(err.message);
